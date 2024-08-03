@@ -97,6 +97,7 @@ function M.run_mvn_test_for_all()
   run_command_in_terminal("mvn test")
 
   print(" 󰂓 running All tests")
+
   vim.defer_fn(function()
     vim.cmd("echo ''")
   end, timeoutlen)
