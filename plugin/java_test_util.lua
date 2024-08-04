@@ -1,4 +1,4 @@
-local util = require("java_test_utils")
+local util = require("java_test_util")
 
 vim.api.nvim_create_user_command("MvnRunMethod", util.run_mvn_test_for_current_method, {
   desc = "Run tests for current method",
