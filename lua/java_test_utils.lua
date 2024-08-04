@@ -1,15 +1,24 @@
 local M = {}
 
 local ts_utils = require("nvim-treesitter.ts_utils")
-local timeoutlen = 3000
+local Terminal = require("toggleterm.terminal").Terminal
+local timeoutlen = 5000
+
+---@param message string
+---@param time integer
+local function show_message_until(message, time)
+  print(message)
+  vim.defer_fn(function()
+    vim.cmd("echo ''")
+  end, time)
+end
 
 ---@param command string
 local function run_command_in_terminal(command)
-  local Terminal = require("toggleterm.terminal").Terminal
   local float_term = Terminal:new({
     cmd = command,
-    hidden = false,
-    display_name = "󰂓 mvn test",
+    hidden = true,
+    display_name = "mvn test",
     direction = "float",
     auto_scroll = true,
     close_on_exit = false,
@@ -26,11 +35,35 @@ local function run_command_in_terminal(command)
     on_close = function(_)
       vim.cmd("startinsert!")
     end,
+    on_stderr = function(_, _, _, _)
+      vim.notify(" Test failed")
+    end,
+    on_exit = function(_, _, exit_code, _)
+      if exit_code == 0 then
+        show_message_until(" Tests passed", timeoutlen)
+      elseif exit_code == 1 then
+        show_message_until(" Tests failed", timeoutlen)
+      end
+    end,
   })
-  float_term:toggle()
+  float_term:spawn()
+
+  --HACK: maybe fix this later
+  function Toggle_term()
+    float_term:toggle()
+  end
+
+  vim.api.nvim_set_keymap(
+    "n",
+    "<leader>Mm",
+    "<cmd>lua Toggle_term()<cr>",
+    { desc = "Toggle terminal", noremap = true, silent = true }
+  )
+  return float_term
 end
 
 ---@param file_path string
+---@return string
 local function get_class_name_from_path(file_path)
   local file_name = file_path:match("([^/]+)$")
   local class_name = file_name:gsub("%.java$", "")
@@ -50,11 +83,7 @@ function M.run_mvn_test_for_current_method()
 
       run_command_in_terminal(test_command)
 
-      print(" 󰂓 running test: " .. method_name .. "..")
-      vim.defer_fn(function()
-        vim.cmd("echo ''")
-      end, timeoutlen)
-
+      vim.notify("󰂓 running test: " .. method_name)
       break
     end
     cursor_node = cursor_node:parent()
@@ -68,17 +97,14 @@ function M.run_mvn_test_for_current_class()
 
   run_command_in_terminal(test_command)
 
-  print(" 󰂓 running tests for class: " .. class_name .. "..")
-  vim.defer_fn(function()
-    vim.cmd("echo ''")
-  end, timeoutlen)
+  vim.notify("󰂓 running tests for class: " .. class_name)
 end
 
 function M.run_mvn_test_for_current_package()
   local file_path = vim.fn.expand("%:p")
   local path_components = {}
 
-  for component in string.gmatch(file_path, "[^/]+") do
+  for component in file_path:gmatch("[^/]+") do
     table.insert(path_components, component)
   end
 
@@ -87,20 +113,13 @@ function M.run_mvn_test_for_current_package()
 
   run_command_in_terminal(test_command)
 
-  print(" 󰂓 running tests for package: " .. package_name .. "..")
-  vim.defer_fn(function()
-    vim.cmd("echo ''")
-  end, timeoutlen)
+  vim.notify("󰂓 running tests for package: " .. package_name)
 end
 
 function M.run_mvn_test_for_all()
   run_command_in_terminal("mvn test")
 
-  print(" 󰂓 running All tests")
-
-  vim.defer_fn(function()
-    vim.cmd("echo ''")
-  end, timeoutlen)
+  vim.notify("󰂓 running All tests")
 end
 
 return M
