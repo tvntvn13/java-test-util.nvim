@@ -18,13 +18,13 @@ local function run_command_in_terminal(command)
   local timeoutlen = M.config.timeoutlen or 5000
   local float_term = terminal:new({
     cmd = command,
-    hidden = true,
-    display_name = "mvn test",
+    hidden = config.hide_terminal,
+    display_name = config.display_name,
     direction = config.direction,
     auto_scroll = config.auto_scroll,
     close_on_exit = config.close_on_exit,
     float_opts = {
-      border = config.border,
+      border = config.terminal_border,
       height = config.terminal_height,
       width = config.terminal_width,
       title_pos = config.title_pos,
@@ -53,7 +53,12 @@ local function run_command_in_terminal(command)
       end
     end,
   })
-  float_term:spawn()
+
+  if config.hide_terminal == true then
+    float_term:spawn()
+  else
+    float_term:toggle()
+  end
 
   --HACK: maybe fix this later
   function Toggle_term()
