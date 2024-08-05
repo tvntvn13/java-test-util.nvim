@@ -62,6 +62,7 @@ Plugin exposes 4 commands to run maven tests:
 - **MvnRunMethod** -- _run test for current method_
 - **MvnRunClass** -- _run tests for current class_
 - **MvnRunPackage** -- _run tests for current package_
+- **MvnRunPrev** -- _re-run previous tests_
 - **MvnRunAll** -- _run all tests_
 
 #### Keymaps

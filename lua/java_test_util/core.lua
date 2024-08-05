@@ -3,6 +3,12 @@ local M = {}
 local ts_utils = require("nvim-treesitter.ts_utils")
 local terminal = require("toggleterm.terminal").Terminal
 
+---@type string|nil
+local last_test_command = nil
+
+---@type string|nil
+local last_test_component = nil
+
 ---@param message string
 ---@param time integer
 local function show_message_until(message, time)
@@ -13,9 +19,13 @@ local function show_message_until(message, time)
 end
 
 ---@param command string
-local function run_command_in_terminal(command)
+---@param component string
+local function run_command_in_terminal(command, component)
   local config = M.config
   local timeoutlen = M.config.timeoutlen or 5000
+  last_test_command = command
+  last_test_component = component
+
   local float_term = terminal:new({
     cmd = command,
     hidden = config.hide_terminal,
@@ -94,7 +104,7 @@ function M.run_mvn_test_for_current_method()
       local class_name = get_class_name_from_path(file_path)
       local test_command = mvn_command .. " test -Dtest=" .. class_name .. "#" .. method_name
 
-      run_command_in_terminal(test_command)
+      run_command_in_terminal(test_command, method_name)
 
       vim.notify("󰂓 running test: " .. method_name)
       break
@@ -109,7 +119,7 @@ function M.run_mvn_test_for_current_class()
   local class_name = get_class_name_from_path(file_path)
   local test_command = mvn_command .. " test -Dtest=" .. class_name
 
-  run_command_in_terminal(test_command)
+  run_command_in_terminal(test_command, class_name)
 
   vim.notify("󰂓 running tests for class: " .. class_name)
 end
@@ -126,14 +136,23 @@ function M.run_mvn_test_for_current_package()
   local package_name = path_components[#path_components - 1]
   local test_command = mvn_command .. " test -Dtest=" .. "'" .. package_name .. "/*.java'"
 
-  run_command_in_terminal(test_command)
+  run_command_in_terminal(test_command, package_name)
 
   vim.notify("󰂓 running tests for package: " .. package_name)
 end
 
+function M.run_mvn_previous_test()
+  if last_test_command and last_test_component then
+    vim.notify("Rerunning tests for: " .. last_test_component)
+    run_command_in_terminal(last_test_command, last_test_component)
+  else
+    show_message_until("No previous test to run", 2000)
+  end
+end
+
 function M.run_mvn_test_for_all()
   local mvn_command = M.config.use_maven_wrapper and "./mvnw" or "mvn"
-  run_command_in_terminal(mvn_command .. " test")
+  run_command_in_terminal(mvn_command .. " test", "all tests")
 
   vim.notify("󰂓 running All tests")
 end

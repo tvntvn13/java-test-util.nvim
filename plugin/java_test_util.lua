@@ -12,6 +12,10 @@ vim.api.nvim_create_user_command("MvnRunPackage", util.run_mvn_test_for_current_
   desc = "Run tests for current package",
 })
 
+vim.api.nvim_create_user_command("MvnRunPrev", util.run_mvn_previous_test, {
+  desc = "Run previous test",
+})
+
 vim.api.nvim_create_user_command("MvnRunAll", util.run_mvn_test_for_all, {
   desc = "Run all tests",
 })
