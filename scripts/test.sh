@@ -3,7 +3,7 @@
 tempfile=".test_output.tmp"
 
 if [[ -n $1 ]]; then
-	nvim --headless --noplugin -u tests/init.vim -c "PlenaryBustedFile $1" | tee "${tempfile}"
+	nvim --headless --noplugin -u tests/init.vim -c "PlenaryBustedFile $1" {minimal_init = 'tests/init.vim'}| tee "${tempfile}"
 else
 	nvim --headless --noplugin -u tests/init.vim -c "PlenaryBustedDirectory tests {minimal_init = 'tests/init.vim'}" | tee "${tempfile}"
 fi

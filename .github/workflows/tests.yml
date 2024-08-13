@@ -1,12 +1,11 @@
 ---
-name: Tests
+name: build
 
 on:
   push:
-    branches: [main, ci_tests]
+    branches: [main]
   pull_request:
     branches: [main]
-
 jobs:
   tests:
     name: tests
@@ -19,6 +18,8 @@ jobs:
             rev: nightly/nvim-linux64.tar.gz
           - os: ubuntu-22.04
             rev: v0.9.1/nvim-linux64.tar.gz
+          - os: ubuntu-22.04
+            rev: v0.10.0/nvim-linux64.tar.gz
     steps:
       - uses: actions/checkout@v4
       - run: date +%F > todays-date
