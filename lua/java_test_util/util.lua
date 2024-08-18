@@ -1,11 +1,27 @@
 local M = {}
 
 local ts_utils = require("nvim-treesitter.ts_utils")
+local lsp_util = require("lspconfig.util")
+
+---@enum T_Type
+T_Type = {
+  METHOD = "method",
+  CLASS = "class",
+  PACKAGE = "package",
+  ALL = "all",
+}
+
+---@type string|nil
+M.root_dir = nil
+
+---@type string|nil
+M.build_tool = M.config_build_tool or nil
 
 ---@param message string
 ---@param time integer
-function M.show_message_until(message, time)
-  print(message)
+---@param level? integer
+function M.show_message_until(message, time, level)
+  vim.notify(message, level)
   vim.defer_fn(function()
     vim.cmd("echo ''")
   end, time)
@@ -51,25 +67,122 @@ function M.get_package_name()
   return package_name
 end
 
----@param config table
+---@param type string
+---@param package_name? string|nil
+---@param class_name? string|nil
+---@param method_name? string|nil
+---@return string
+local function build_maven_command(type, package_name, class_name, method_name)
+  local test_runner = M.config.use_wrapper and "./mvnw" or "mvn"
+
+  if type == T_Type.ALL then
+    return test_runner .. " test"
+  elseif type == T_Type.PACKAGE then
+    return test_runner .. " test -Dtest=" .. "'" .. package_name .. "/*.java'"
+  elseif type == T_Type.CLASS then
+    return test_runner .. " test -Dtest=" .. class_name
+  elseif type == T_Type.METHOD then
+    return test_runner .. " test -Dtest=" .. class_name .. "#" .. method_name
+  else
+    return ""
+  end
+end
+
+---@param type string
+---@param package_name? string
+---@param class_name? string
+---@param method_name? string
+---@return string
+local function build_gradle_command(type, package_name, class_name, method_name)
+  local test_runner = M.config.use_wrapper and "./gradlew" or "gradle"
+
+  if type == T_Type.ALL then
+    return test_runner .. " test"
+  elseif type == T_Type.PACKAGE and package_name then
+    return test_runner .. " test --tests '*." .. package_name .. ".*'"
+  elseif type == T_Type.CLASS and class_name then
+    return test_runner .. " test --tests " .. class_name
+  elseif type == T_Type.METHOD then
+    return test_runner .. " test --tests '*." .. class_name .. "." .. method_name .. "'"
+  else
+    return ""
+  end
+end
+
 ---@param type string
 ---@param package_name string|nil
 ---@param class_name string|nil
 ---@param method_name string|nil
 ---@return string
-function M.build_test_command_string(config, type, package_name, class_name, method_name)
-  local test_runner = config.use_maven_wrapper and "./mvnw" or "mvn"
+function M.build_test_command_string(type, package_name, class_name, method_name)
+  if not M.build_tool then
+    M.build_tool = M.detect_build_tool()
+  end
 
-  if type == "all" then
-    return test_runner .. " test"
-  elseif type == "package" then
-    return test_runner .. " test -Dtest=" .. "'" .. package_name .. "/*.java'"
-  elseif type == "class" then
-    return test_runner .. " test -Dtest=" .. class_name
-  elseif type == "method" then
-    return test_runner .. " test -Dtest=" .. class_name .. "#" .. method_name
+  ---@type string
+  local command
+
+  if M.build_tool == "mvn" then
+    command = build_maven_command(type, package_name, class_name, method_name)
+    return command
+  elseif M.build_tool == "gradle" then
+    command = build_gradle_command(type, package_name, class_name, method_name)
+    return command
   else
+    vim.notify("unsuported build tool: " .. (M.build_tool or "none"), vim.log.levels.ERROR)
     return ""
+  end
+end
+
+---@return string|nil
+function M.get_project_root()
+  local root_dir_func = lsp_util.root_pattern({ ".git", ".mvn", "build.gradle", "gradlew", "mvnw", "pom.xml" })
+  local root_dir = root_dir_func(vim.fn.expand("%:p"))
+
+  if not root_dir then
+    vim.notify("project root not found!", vim.log.levels.ERROR)
+    return nil
+  end
+
+  return root_dir
+end
+
+---@return string|nil
+function M.detect_build_tool()
+  if M.config.build_tool then
+    return M.config.build_tool
+  end
+
+  local root_dir = M.get_project_root()
+
+  if not root_dir then
+    vim.notify("Project root not found")
+    return nil
+  end
+
+  M.root_dir = root_dir
+
+  if lsp_util.path.exists(lsp_util.path.join(root_dir, "pom.xml")) then
+    return "mvn"
+  elseif lsp_util.path.exists(lsp_util.path.join(root_dir, "build.gradle")) then
+    return "gradle"
+  else
+    vim.notify("no build tool detected")
+    return nil
+  end
+end
+
+---@param component string
+---@param type string
+function M.notify_tests_running(component, type)
+  if type == T_Type.METHOD then
+    vim.notify("󰂓 running test: " .. component)
+  elseif type == T_Type.CLASS then
+    vim.notify("󰂓 running tests for class: " .. component)
+  elseif type == T_Type.PACKAGE then
+    vim.notify("󰂓 running tests for package: " .. component)
+  elseif type == T_Type.ALL then
+    vim.notify("󰂓 running All tests")
   end
 end
 
