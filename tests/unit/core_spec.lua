@@ -4,12 +4,15 @@ local mock = require("luassert.mock")
 local stub = require("luassert.stub")
 
 describe("core:", function()
-  local term, default_config
+  local term, default_config, util
 
   before_each(function()
-    term = mock(require("java_test_util.terminal"), true)
+    vim = mock(vim, false)
     stub(vim, "notify")
+    term = mock(require("java_test_util.terminal"), true)
+    util = mock(require("java_test_util.util"), false)
     stub(term, "run_command_in_terminal")
+    stub(util, "notify_tests_running")
     require("java_test_util").setup({})
   end)
 
@@ -18,6 +21,7 @@ describe("core:", function()
   end)
 
   it("should load config correctly", function()
+    ---@type Config
     default_config = require("java_test_util.config")
     -- Arrange
     -- Act
@@ -31,7 +35,7 @@ describe("core:", function()
     -- Act
     M.run_mvn_previous_test()
     -- Assert
-    assert.stub(vim.notify).was_not_called()
+    assert.stub(vim.notify).was_called(1)
     assert.stub(require("java_test_util.util").show_message_until).was_called_with("No previous test to run", 2000)
   end)
 
@@ -40,7 +44,8 @@ describe("core:", function()
     -- Act
     M.run_mvn_test_for_all()
     -- Assert
-    assert.stub(vim.notify).was_called_with("󰂓 running All tests")
+    -- assert.stub(vim.notify).was_called_with("󰂓 running All tests")
+    assert.stub(util.notify_tests_running).was_called()
   end)
 
   it("should rerun the previous test", function()
@@ -52,8 +57,8 @@ describe("core:", function()
 
     M.run_mvn_previous_test()
     -- Assert
-    assert.stub(vim.notify).was_called(2)
-    assert.stub(vim.notify).was_called_with("Rerunning tests for: all tests")
+    assert.stub(util.notify_tests_running).was_called(1)
+    assert.stub(vim.notify).was_called_with("󰂓 Re-running tests for: all tests")
   end)
 
   it("should run test for current package", function()
@@ -65,7 +70,7 @@ describe("core:", function()
     M.run_mvn_test_for_current_package()
 
     -- Assert
-    assert.stub(term.run_command_in_terminal).was_called_with(mock_command, "api")
+    assert.stub(term.run_command_in_terminal).was_called_with(mock_command, "api", T_Type.PACKAGE)
   end)
 
   it("should run test for current method", function()
@@ -82,7 +87,7 @@ describe("core:", function()
     M.run_mvn_test_for_current_method()
 
     --Assert
-    assert.stub(term.run_command_in_terminal).was_called_with(mock_command, "testMethod")
+    assert.stub(term.run_command_in_terminal).was_called_with(mock_command, "testMethod", T_Type.METHOD)
   end)
 
   it("should run test for current class", function()
@@ -95,7 +100,9 @@ describe("core:", function()
     -- Act
     M.run_mvn_test_for_current_class()
     -- Assert
-    assert.stub(term.run_command_in_terminal).was_called_with(mock_command, "ProjectControllerIntegrationTest")
+    assert
+      .stub(term.run_command_in_terminal)
+      .was_called_with(mock_command, "ProjectControllerIntegrationTest", T_Type.CLASS)
   end)
 
   it("should handle case when not inside method", function()

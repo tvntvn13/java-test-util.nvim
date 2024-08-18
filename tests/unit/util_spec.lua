@@ -1,18 +1,19 @@
 local M = require("java_test_util.util")
 local stub = require("luassert.stub")
+local mock = require("luassert.mock")
 
-local mockPath =
-"/Users/user/workspace/projects/java/postgres-demo/src/test/java/com/tvntvn/postgresdemo/api/ProjectControllerIntegrationTest.java"
+local mockPath = "/postgres-demo/src/test/java/com/tvntvn/postgresdemo/api/ProjectControllerIntegrationTest.java"
 
 describe("util:", function()
   before_each(function()
+    vim = mock(vim, false)
+    stub(vim, "notify")
     stub(vim.fn, "expand").returns(mockPath)
-    stub(_G, "print")
   end)
 
   after_each(function()
     vim.fn.expand:revert()
-    print:revert()
+    vim.notify:revert()
   end)
 
   it("should initialize correctly", function()
@@ -56,9 +57,9 @@ describe("util:", function()
   it("should print the correct message", function()
     -- Arrange
     -- Act
-    M.show_message_until("hello", 110)
+    M.show_message_until("hello", 110, vim.log.levels.ERROR)
     -- Assert
-    assert.stub(print).was_called_with("hello")
-    assert.stub(print).was_called(1)
+    assert.stub(vim.notify).was_called_with("hello", 4)
+    assert.stub(vim.notify).was_called(1)
   end)
 end)
