@@ -3,7 +3,7 @@
 ![Lua](https://img.shields.io/badge/lua-%232C2D72.svg?style=for-the-badge&logo=lua&logoColor=white)
 <img src="https://img.shields.io/badge/NeoVim-%2357A143.svg?&style=for-the-badge&logo=neovim&logoColor=white">
 
-[![stylua](https://github.com/tvntvn13/java-test-util.nvim/actions/workflows/stylua.yml/badge.svg)](https://github.com/tvntvn13/java-test-util.nvim/actions/workflows/stylua.yml)
+[![build](https://github.com/tvntvn13/java-test-util.nvim/actions/workflows/tests.yml/badge.svg)](https://github.com/tvntvn13/java-test-util.nvim/actions/workflows/tests.yml)
 
 Plugin to run Java tests in a toggleterm, on the background or on a floating terminal.
 Currently only supports Maven projects.
