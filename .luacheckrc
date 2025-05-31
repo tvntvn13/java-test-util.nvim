@@ -1,6 +1,6 @@
 std = "min+busted"
 max_code_line_length = 135
-max_commet_line_length = false
+max_comment_line_length = false
 globals = {
   "vim",
   "TestType",
