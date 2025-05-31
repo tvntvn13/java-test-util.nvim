@@ -70,7 +70,7 @@ describe("core:", function()
     M.run_mvn_test_for_current_package()
 
     -- Assert
-    assert.stub(term.run_command_in_terminal).was_called_with(mock_command, "api", T_Type.PACKAGE)
+    assert.stub(term.run_command_in_terminal).was_called_with(mock_command, "api", TestType.PACKAGE)
   end)
 
   it("should run test for current method", function()
@@ -87,7 +87,7 @@ describe("core:", function()
     M.run_mvn_test_for_current_method()
 
     --Assert
-    assert.stub(term.run_command_in_terminal).was_called_with(mock_command, "testMethod", T_Type.METHOD)
+    assert.stub(term.run_command_in_terminal).was_called_with(mock_command, "testMethod", TestType.METHOD)
   end)
 
   it("should run test for current class", function()
@@ -102,7 +102,7 @@ describe("core:", function()
     -- Assert
     assert
       .stub(term.run_command_in_terminal)
-      .was_called_with(mock_command, "ProjectControllerIntegrationTest", T_Type.CLASS)
+      .was_called_with(mock_command, "ProjectControllerIntegrationTest", TestType.CLASS)
   end)
 
   it("should handle case when not inside method", function()
