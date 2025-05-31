@@ -4,7 +4,7 @@ local ts_utils = require("nvim-treesitter.ts_utils")
 local lsp_util = require("lspconfig.util")
 
 ---@enum T_Type
-T_Type = {
+TestType = {
   METHOD = "method",
   CLASS = "class",
   PACKAGE = "package",
@@ -75,13 +75,13 @@ end
 local function build_maven_command(type, package_name, class_name, method_name)
   local test_runner = M.config.use_wrapper and "./mvnw" or "mvn"
 
-  if type == T_Type.ALL then
+  if type == TestType.ALL then
     return test_runner .. " test"
-  elseif type == T_Type.PACKAGE then
+  elseif type == TestType.PACKAGE then
     return test_runner .. " test -Dtest=" .. "'" .. package_name .. "/*.java'"
-  elseif type == T_Type.CLASS then
+  elseif type == TestType.CLASS then
     return test_runner .. " test -Dtest=" .. class_name
-  elseif type == T_Type.METHOD then
+  elseif type == TestType.METHOD then
     return test_runner .. " test -Dtest=" .. class_name .. "#" .. method_name
   else
     return ""
@@ -96,13 +96,13 @@ end
 local function build_gradle_command(type, package_name, class_name, method_name)
   local test_runner = M.config.use_wrapper and "./gradlew" or "gradle"
 
-  if type == T_Type.ALL then
+  if type == TestType.ALL then
     return test_runner .. " test"
-  elseif type == T_Type.PACKAGE and package_name then
+  elseif type == TestType.PACKAGE and package_name then
     return test_runner .. " test --tests '*." .. package_name .. ".*'"
-  elseif type == T_Type.CLASS and class_name then
+  elseif type == TestType.CLASS and class_name then
     return test_runner .. " test --tests " .. class_name
-  elseif type == T_Type.METHOD then
+  elseif type == TestType.METHOD then
     return test_runner .. " test --tests '*." .. class_name .. "." .. method_name .. "'"
   else
     return ""
@@ -167,7 +167,7 @@ function M.detect_build_tool()
   elseif lsp_util.path.exists(lsp_util.path.join(root_dir, "build.gradle")) then
     return "gradle"
   else
-    vim.notify("no build tool detected")
+    vim.notify("no build tool detected", vim.log.levels.WARN)
     return nil
   end
 end
@@ -175,13 +175,13 @@ end
 ---@param component string
 ---@param type string
 function M.notify_tests_running(component, type)
-  if type == T_Type.METHOD then
+  if type == TestType.METHOD then
     vim.notify("󰂓 running test: " .. component)
-  elseif type == T_Type.CLASS then
+  elseif type == TestType.CLASS then
     vim.notify("󰂓 running tests for class: " .. component)
-  elseif type == T_Type.PACKAGE then
+  elseif type == TestType.PACKAGE then
     vim.notify("󰂓 running tests for package: " .. component)
-  elseif type == T_Type.ALL then
+  elseif type == TestType.ALL then
     vim.notify("󰂓 running All tests")
   end
 end

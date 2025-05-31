@@ -2,7 +2,6 @@ local M = require("java_test_util.history")
 
 local mock = require("luassert.mock")
 local stub = require("luassert.stub")
--- local spy = require("luassert.spy")
 
 describe("history:", function()
   before_each(function()
@@ -28,7 +27,7 @@ describe("history:", function()
     -- Act
     require("java_test_util").setup({ max_history_size = 10 })
     assert.stub(vim.notify).was_called(1)
-    assert.stub(vim.notify).was_called_with("project root not found!", 4)
+    assert.stub(vim.notify).was_called_with("no build tool detected", vim.log.levels.WARN)
     -- Assert
     assert.equals(M.config.max_history_size, 10)
   end)

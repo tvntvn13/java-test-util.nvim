@@ -45,7 +45,7 @@ describe("terminal:", function()
   it("should store last command and component", function()
     -- Arrange
     -- Act
-    M.run_command_in_terminal("mvn test", "all tests", T_Type.ALL)
+    M.run_command_in_terminal("mvn test", "all tests", TestType.ALL)
     -- Assert
     assert.equal(M.last_test_command, "mvn test")
     assert.equal(M.last_test_component, "all tests")
@@ -54,14 +54,14 @@ describe("terminal:", function()
   it("should update last command and component", function()
     -- Arrange
     -- Act
-    M.run_command_in_terminal("mvn test -Dtest=TestClass#TestMethod", "TestMethod", T_Type.METHOD)
+    M.run_command_in_terminal("mvn test -Dtest=TestClass#TestMethod", "TestMethod", TestType.METHOD)
     -- Assert
     assert.equals(M.last_test_component, "TestMethod")
     assert.equals(M.last_test_command, "mvn test -Dtest=TestClass#TestMethod")
 
     -- Arrange
     -- Act
-    M.run_command_in_terminal("mvn test", "all tests", T_Type.ALL)
+    M.run_command_in_terminal("mvn test", "all tests", TestType.ALL)
     -- Assert
     assert.equal(M.last_test_command, "mvn test")
     assert.equal(M.last_test_component, "all tests")
@@ -72,7 +72,7 @@ describe("terminal:", function()
     -- Arrange
     require("java_test_util").setup({ hide_terminal = true })
     -- Act
-    M.run_command_in_terminal("mvn test", "all tests", T_Type.ALL)
+    M.run_command_in_terminal("mvn test", "all tests", TestType.ALL)
     -- Assert
     assert.stub(mock_term.spawn).was_called()
   end)
@@ -81,7 +81,7 @@ describe("terminal:", function()
     -- Arrange
     require("java_test_util").setup({ hide_terminal = false })
     -- Act
-    M.run_command_in_terminal("mvn test", "all tests", T_Type.ALL)
+    M.run_command_in_terminal("mvn test", "all tests", TestType.ALL)
     -- Assert
     assert.stub(mock_term.toggle).was_called()
   end)
@@ -90,23 +90,21 @@ describe("terminal:", function()
     -- Arrange
     require("java_test_util").setup({})
     -- Act
-    M.run_command_in_terminal("mvn test", "all tests", T_Type.ALL)
+    M.run_command_in_terminal("mvn test", "all tests", TestType.ALL)
     -- Assert
     assert
-        .stub(vim.api.nvim_set_keymap)
-        .was_called_with("n", "<leader>Mm", "<cmd>lua Toggle_term()<cr>",
-          { desc = "Toggle terminal", noremap = true, silent = true })
+      .stub(vim.api.nvim_set_keymap)
+      .was_called_with("n", "<leader>Mm", "<cmd>lua Toggle_term()<cr>", { desc = "Toggle terminal", noremap = true, silent = true })
   end)
 
   it("should set the custom keymap for toggle", function()
     -- Arrange
     require("java_test_util").setup({ toggle_key = "<c-t>" })
     -- Act
-    M.run_command_in_terminal("mvn test", "all tests", T_Type.ALL)
+    M.run_command_in_terminal("mvn test", "all tests", TestType.ALL)
     -- Assert
     assert
-        .stub(vim.api.nvim_set_keymap)
-        .was_called_with("n", "<c-t>", "<cmd>lua Toggle_term()<cr>",
-          { desc = "Toggle terminal", noremap = true, silent = true })
+      .stub(vim.api.nvim_set_keymap)
+      .was_called_with("n", "<c-t>", "<cmd>lua Toggle_term()<cr>", { desc = "Toggle terminal", noremap = true, silent = true })
   end)
 end)

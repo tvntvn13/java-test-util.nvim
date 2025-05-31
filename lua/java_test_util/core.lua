@@ -11,27 +11,27 @@ function M.run_mvn_test_for_current_method()
     return
   end
 
-  local test_command = util.build_test_command_string(T_Type.METHOD, nil, class_name, method_name)
+  local test_command = util.build_test_command_string(TestType.METHOD, nil, class_name, method_name)
 
-  term.run_command_in_terminal(test_command, method_name, T_Type.METHOD)
-  util.notify_tests_running(method_name, T_Type.METHOD)
+  term.run_command_in_terminal(test_command, method_name, TestType.METHOD)
+  util.notify_tests_running(method_name, TestType.METHOD)
 end
 
 function M.run_mvn_test_for_current_class()
   local file_path = util.get_filepath()
   local class_name = util.get_class_name_from_path(file_path)
-  local test_command = util.build_test_command_string(T_Type.CLASS, nil, class_name)
+  local test_command = util.build_test_command_string(TestType.CLASS, nil, class_name)
 
-  term.run_command_in_terminal(test_command, class_name, T_Type.CLASS)
-  util.notify_tests_running(class_name, T_Type.CLASS)
+  term.run_command_in_terminal(test_command, class_name, TestType.CLASS)
+  util.notify_tests_running(class_name, TestType.CLASS)
 end
 
 function M.run_mvn_test_for_current_package()
   local package_name = util.get_package_name()
-  local test_command = util.build_test_command_string(T_Type.PACKAGE, package_name)
+  local test_command = util.build_test_command_string(TestType.PACKAGE, package_name)
 
-  term.run_command_in_terminal(test_command, package_name, T_Type.PACKAGE)
-  util.notify_tests_running(package_name, T_Type.PACKAGE)
+  term.run_command_in_terminal(test_command, package_name, TestType.PACKAGE)
+  util.notify_tests_running(package_name, TestType.PACKAGE)
 end
 
 function M.run_mvn_previous_test()
@@ -44,9 +44,9 @@ function M.run_mvn_previous_test()
 end
 
 function M.run_mvn_test_for_all()
-  local test_command = util.build_test_command_string(T_Type.ALL, T_Type.ALL)
-  term.run_command_in_terminal(test_command, T_Type.ALL, T_Type.ALL)
-  util.notify_tests_running(T_Type.ALL, T_Type.ALL)
+  local test_command = util.build_test_command_string(TestType.ALL, TestType.ALL)
+  term.run_command_in_terminal(test_command, TestType.ALL, TestType.ALL)
+  util.notify_tests_running(TestType.ALL, TestType.ALL)
 end
 
 return M
