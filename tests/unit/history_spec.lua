@@ -1,4 +1,5 @@
 local M = require("java_test_util.history")
+local shared = require("java_test_util.shared")
 
 local mock = require("luassert.mock")
 local stub = require("luassert.stub")
@@ -18,7 +19,7 @@ describe("history:", function()
     -- Act
     require("java_test_util").setup({})
     -- Assert
-    assert.equals(M.config.max_history_size, 12)
+    assert.equals(shared.config.max_history_size, 12)
     assert.are.same(M.cmd_history, {})
   end)
 
@@ -27,8 +28,10 @@ describe("history:", function()
     -- Act
     require("java_test_util").setup({ max_history_size = 10 })
     assert.stub(vim.notify).was_called(1)
-    assert.stub(vim.notify).was_called_with("no build tool detected", vim.log.levels.WARN)
+    assert
+      .stub(vim.notify)
+      .was_called_with("No build tool detected, disabling java-test-util.nvim", vim.log.levels.INFO)
     -- Assert
-    assert.equals(M.config.max_history_size, 10)
+    assert.equals(shared.config.max_history_size, 10)
   end)
 end)

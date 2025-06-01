@@ -5,13 +5,13 @@ local M = {}
 ---@field component? string
 ---@field type? string
 
-local config = require("java_test_util.config")
 local util = require("java_test_util.util")
+local shared = require("java_test_util.shared")
 
 ---@type CommandHistoryItem[]|nil
 M.cmd_history = {}
 
-local max_size = config.max_history_size or 10
+local max_size = shared.config.max_history_size or 10
 local CACHE_PATH = "/java-test-util/"
 local CACHE_SUFFIX = "_history.lua"
 

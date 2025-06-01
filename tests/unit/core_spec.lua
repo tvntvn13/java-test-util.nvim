@@ -1,4 +1,5 @@
 local M = require("java_test_util.core")
+local shared = require("java_test_util.shared")
 
 local mock = require("luassert.mock")
 local stub = require("luassert.stub")
@@ -21,12 +22,13 @@ describe("core:", function()
   end)
 
   it("should load config correctly", function()
+    -- Arrange
     ---@type Config
     default_config = require("java_test_util.config")
-    -- Arrange
     -- Act
+    require("java_test_util").setup({})
     -- Assert
-    assert.are.same(M.config, default_config)
+    assert.are.same(shared.config, default_config)
   end)
 
   it("should not rerun if no previous test", function()
