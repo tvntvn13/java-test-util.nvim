@@ -2,6 +2,7 @@ local M = require("java_test_util.terminal")
 
 local mock = require("luassert.mock")
 local stub = require("luassert.stub")
+local shared = require("java_test_util.shared")
 -- local spy = require("luassert.spy")
 
 describe("terminal:", function()
@@ -38,8 +39,8 @@ describe("terminal:", function()
     -- Assert
     assert.equals(M.last_test_command, nil)
     assert.equals(M.last_test_component, nil)
-    assert.equals(M.config.close_key, "q")
-    assert.equals(M.config.use_wrapper, false)
+    assert.equals(shared.config.close_key, "q")
+    assert.equals(shared.config.use_wrapper, false)
   end)
 
   it("should store last command and component", function()
@@ -94,7 +95,7 @@ describe("terminal:", function()
     -- Assert
     assert
       .stub(vim.api.nvim_set_keymap)
-      .was_called_with("n", "<leader>Mm", "<cmd>lua Toggle_term()<cr>", { desc = "Toggle terminal", noremap = true, silent = true })
+      .was_called_with("n", "<leader>Mm", "<cmd>lua _Toggle_term()<cr>", { desc = "Toggle terminal", noremap = true, silent = true })
   end)
 
   it("should set the custom keymap for toggle", function()
@@ -105,6 +106,6 @@ describe("terminal:", function()
     -- Assert
     assert
       .stub(vim.api.nvim_set_keymap)
-      .was_called_with("n", "<c-t>", "<cmd>lua Toggle_term()<cr>", { desc = "Toggle terminal", noremap = true, silent = true })
+      .was_called_with("n", "<c-t>", "<cmd>lua _Toggle_term()<cr>", { desc = "Toggle terminal", noremap = true, silent = true })
   end)
 end)

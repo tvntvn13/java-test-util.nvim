@@ -37,13 +37,16 @@ local M = {}
 local history = require("java_test_util.history")
 local utils = require("java_test_util.util")
 
+---@type Config
+local shared = require("java_test_util.shared")
+
 ---@type string|nil
 M.last_test_command = nil
 
 ---@type string|nil
 M.last_test_component = nil
 
----@type T_Type|nil
+---@type TestType|nil
 M.last_test_type = nil
 
 ---@type Terminal
@@ -54,9 +57,7 @@ local terminal = require("toggleterm.terminal").Terminal
 ---@param type string
 ---@return Terminal
 function M.run_command_in_terminal(command, component, type)
-  ---@type Config
-  local config = M.config
-  local timeoutlen = config.timeout_len or 2000
+  local timeoutlen = shared.config.timeout_len or 2000
   M.last_test_command = command
   M.last_test_component = component
   M.last_test_type = type
@@ -67,7 +68,7 @@ function M.run_command_in_terminal(command, component, type)
 
   local float_term = terminal:new({
     cmd = command,
-    hidden = config.hide_terminal,
+    hidden = shared.config.hide_terminal,
     _display_name = function(_)
       return " 󰂓 " .. component .. ":" .. type:upper()
     end,
@@ -75,15 +76,15 @@ function M.run_command_in_terminal(command, component, type)
     display_name = function(_)
       return " 󰂓 " .. component .. ":" .. type:upper()
     end,
-    direction = config.direction,
-    auto_scroll = config.auto_scroll,
-    close_on_exit = config.close_on_exit,
+    direction = shared.config.direction,
+    auto_scroll = shared.config.auto_scroll,
+    close_on_exit = shared.config.close_on_exit,
     -- title = " 󰂓 " .. component .. type:upper(),
     float_opts = {
-      border = config.terminal_border,
-      height = config.terminal_height,
-      width = config.terminal_width,
-      title_pos = config.title_pos,
+      border = shared.config.terminal_border,
+      height = shared.config.terminal_height,
+      width = shared.config.terminal_width,
+      title_pos = shared.config.title_pos,
       title = " 󰂓 " .. component .. ":" .. type:upper(),
       display_name = " 󰂓 " .. component .. ":" .. type:upper(),
       float_name = " 󰂓 " .. component .. ":" .. type:upper(),
@@ -97,7 +98,7 @@ function M.run_command_in_terminal(command, component, type)
       vim.api.nvim_buf_set_keymap(
         term.bufnr,
         "n",
-        config.close_key,
+        shared.config.close_key,
         "<cmd>close<cr>",
         { noremap = true, silent = true }
       )
@@ -118,21 +119,20 @@ function M.run_command_in_terminal(command, component, type)
     end,
   })
 
-  if config.hide_terminal == true then
+  if shared.config.hide_terminal == true then
     float_term:spawn()
   else
     float_term:toggle()
   end
 
-  --HACK: maybe fix this later
   function _Toggle_term()
     float_term:toggle()
   end
 
   vim.api.nvim_set_keymap(
     "n",
-    config.toggle_key,
-    "<cmd>lua Toggle_term()<cr>",
+    shared.config.toggle_key,
+    "<cmd>lua _Toggle_term()<cr>",
     { desc = "Toggle terminal", noremap = true, silent = true }
   )
 

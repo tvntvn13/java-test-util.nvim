@@ -5,6 +5,7 @@ local history = require("java_test_util.history")
 local terminal = require("java_test_util.terminal")
 local util = require("java_test_util.util")
 local Popup = require("nui.popup")
+local shared = require("java_test_util.shared")
 
 local build_tool_icons = {
   mvn = "  ",
@@ -69,7 +70,7 @@ function M.select_menu_item(_)
     util.notify_tests_running(component, type)
     terminal.run_command_in_terminal(command, component, type)
   end
-  if M.config.auto_close_menu ~= false then
+  if shared.config.auto_close_menu ~= false then
     M.popup:unmount()
   end
 end
@@ -81,9 +82,9 @@ function M.create_history_menu()
   M.popup:mount()
 
   vim.api.nvim_buf_set_lines(M.popup.bufnr, 0, -1, false, descriptions)
-  vim.api.nvim_buf_set_option(M.popup.bufnr, "readonly", true)
-  vim.api.nvim_buf_set_option(M.popup.bufnr, "modified", false)
-  vim.api.nvim_buf_set_option(M.popup.bufnr, "modifiable", false)
+  vim.api.nvim_set_option_value("readonly", true, { buf = M.popup.bufnr })
+  vim.api.nvim_set_option_value("modified", false, { buf = M.popup.bufnr })
+  vim.api.nvim_set_option_value("modifiable", false, { buf = M.popup.bufnr })
 
   M.popup:map("n", "<cr>", function(_)
     M.select_menu_item(_)
