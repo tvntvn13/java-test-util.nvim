@@ -1,4 +1,4 @@
-*java-test-util.txt*       For Neovim >= 0.9.5       Last change: 2025 June 01
+*java-test-util.txt*       For Neovim >= 0.9.5       Last change: 2025 June 11
 
 ==============================================================================
 Table of Contents                           *java-test-util-table-of-contents*
