@@ -1,4 +1,4 @@
-.PHONY: clean test install all
+.PHONY: clean test install all ci
 
 test: install
 	./scripts/test.sh
@@ -36,3 +36,6 @@ lint:
 
 format:
 	stylua . --color always --check lua
+
+ci: install
+	make test && make lint && make format
