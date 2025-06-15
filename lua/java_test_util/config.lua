@@ -19,15 +19,44 @@
 ---@field count number? the count that triggers that specific terminal
 ---@field highlights table<string, table<string, string>>?
 
----@class Config
----@field use_wrapper boolean
----@field timeout_len number
----@field toggle_key string
----@field close_key string
----@field max_history_size number
----@field terminal TerminalConfig
+---@class PopupBorderConfig
+---@field style string? border style: "single", "double", "rounded", "solid", "shadow", "none", or table
+---@field padding table<number>? padding around content [top, right, bottom, left] or [vertical, horizontal]
+---@field text table? border text configuration
+---@field highlight string? border highlight group
 
----@type Config
+---@class PopupSizeConfig
+---@field width number|string? width as number or percentage string
+---@field height number|string? height as number or percentage string
+
+---@class PopupPositionConfig
+---@field row number|string? row position
+---@field col number|string? column position
+
+---@class MenuConfig
+---@field auto_close boolean? whether to auto-close menu after selection
+---@field enter boolean? whether to enter the popup window on mount
+---@field focusable boolean? whether the popup window is focusable
+---@field border PopupBorderConfig? border configuration
+---@field position string|PopupPositionConfig? position: "50%" or table with row/col
+---@field size PopupSizeConfig? size configuration
+---@field relative string? what the popup is relative to: "editor", "win", "cursor"
+---@field anchor string? anchor point: "NW", "NE", "SW", "SE"
+---@field buf_options table<string, any>? buffer options
+---@field win_options table<string, any>? window options
+---@field zindex number? z-index for layering
+---@field noautocmd boolean? disable autocmds during mount/unmount
+
+---@class java_test_util.Config
+---@field use_wrapper boolean whether to use the wrapper script for running tests
+---@field timeout_len number how long to show messages in milliseconds
+---@field toggle_key string the key to toggle the test terminal
+---@field close_key string the key to close the test terminal
+---@field max_history_size number the maximum number of test commands to keep in history
+---@field terminal TerminalConfig
+---@field menu MenuConfig
+
+---@type java_test_util.Config
 local config = {
   use_wrapper = false,
   timeout_len = 2000,
@@ -35,7 +64,6 @@ local config = {
   close_key = "q",
   max_history_size = 12,
   terminal = {
-    -- Default terminal configuration based on current usage
     hidden = true,
     direction = "float",
     auto_scroll = true,
@@ -49,6 +77,33 @@ local config = {
         Normal = { link = "Normal" },
         FloatBorder = { link = "FloatBorder" },
       },
+    },
+  },
+  menu = {
+    auto_close = true,
+    enter = true,
+    focusable = true,
+    border = {
+      style = "rounded",
+      padding = { 1, 0 },
+      text = {
+        top = " 󰂓 Test history ",
+        top_align = "left",
+        bottom_align = "right",
+      },
+    },
+    position = "50%",
+    size = {
+      width = "40%",
+      height = "25%",
+    },
+    buf_options = {
+      filetype = "java-test",
+    },
+    win_options = {
+      winhighlight = "Normal:CursorLineNr,FloatBorder:FloatBorder",
+      cursorline = true,
+      number = true,
     },
   },
 }
