@@ -69,18 +69,18 @@ describe("terminal:", function()
     assert.stub(terminal.new).was_called(2)
   end)
 
-  it("should run tests on the background if hide_terminal is true", function()
+  it("should run tests on the background if terminal.hidden is true", function()
     -- Arrange
-    require("java_test_util").setup({ hide_terminal = true })
+    require("java_test_util").setup({ terminal = { hidden = true } })
     -- Act
     M.run_command_in_terminal("mvn test", "all tests", TestType.ALL)
     -- Assert
     assert.stub(mock_term.spawn).was_called()
   end)
 
-  it("should run tests on the foreground if hide_terminal is false", function()
+  it("should run tests on the foreground if terminal.hidden is false", function()
     -- Arrange
-    require("java_test_util").setup({ hide_terminal = false })
+    require("java_test_util").setup({ terminal = { hidden = false } })
     -- Act
     M.run_command_in_terminal("mvn test", "all tests", TestType.ALL)
     -- Assert
