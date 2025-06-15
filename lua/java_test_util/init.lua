@@ -8,7 +8,7 @@ local shared = require("java_test_util.shared")
 local M = {}
 
 function M.setup(opts)
-  ---@type Config
+  ---@type java_test_util.Config
   shared.config = vim.tbl_deep_extend("force", default_config, opts or {})
 
   util.root_dir = util.get_project_root()

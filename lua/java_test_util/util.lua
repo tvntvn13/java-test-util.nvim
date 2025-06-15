@@ -12,10 +12,22 @@ TestType = {
   ALL = "all",
 }
 
+---@enum BuildTool
+BuildTool = {
+  GRADLE = "gradle",
+  MAVEN = "mvn",
+}
+
+---@enum BuildToolWrapper
+BuildToolWrapper = {
+  GRADLE = "./gradlew",
+  MAVEN = "./mvnw",
+}
+
 ---@type string|nil
 M.root_dir = nil
 
----@type string|nil
+---@type BuildTool|nil
 M.build_tool = config.build_tool or nil
 
 ---@param message string
@@ -68,13 +80,13 @@ function M.get_package_name()
   return package_name
 end
 
----@param type string
+---@param type TestType
 ---@param package_name? string|nil
 ---@param class_name? string|nil
 ---@param method_name? string|nil
 ---@return string
 local function build_maven_command(type, package_name, class_name, method_name)
-  local test_runner = config.use_wrapper and "./mvnw" or "mvn"
+  local test_runner = config.use_wrapper and BuildToolWrapper.MAVEN or BuildTool.MAVEN
 
   if type == TestType.ALL then
     return test_runner .. " test"
@@ -89,13 +101,13 @@ local function build_maven_command(type, package_name, class_name, method_name)
   end
 end
 
----@param type string
+---@param type TestType
 ---@param package_name? string
 ---@param class_name? string
 ---@param method_name? string
 ---@return string
 local function build_gradle_command(type, package_name, class_name, method_name)
-  local test_runner = config.use_wrapper and "./gradlew" or "gradle"
+  local test_runner = config.use_wrapper and BuildToolWrapper.GRADLE or BuildTool.GRADLE
 
   if type == TestType.ALL then
     return test_runner .. " test"
@@ -110,7 +122,7 @@ local function build_gradle_command(type, package_name, class_name, method_name)
   end
 end
 
----@param type string
+---@param type TestType
 ---@param package_name string|nil
 ---@param class_name string|nil
 ---@param method_name string|nil
@@ -123,14 +135,13 @@ function M.build_test_command_string(type, package_name, class_name, method_name
   ---@type string
   local command
 
-  if M.build_tool == "mvn" then
+  if M.build_tool == BuildTool.MAVEN then
     command = build_maven_command(type, package_name, class_name, method_name)
     return command
-  elseif M.build_tool == "gradle" then
+  elseif M.build_tool == BuildTool.GRADLE then
     command = build_gradle_command(type, package_name, class_name, method_name)
     return command
   else
-    -- vim.notify("unsuported build tool: " .. (M.build_tool or "none"), vim.log.levels.WARN)
     return ""
   end
 end
@@ -148,27 +159,23 @@ function M.get_project_root()
 end
 
 ---@param root_dir string root of project
----@return string|nil
+---@return BuildTool|nil
 function M.detect_build_tool(root_dir)
   if config.build_tool then
     return config.build_tool
   end
 
-  -- local root_dir = M.get_project_root()
-
   if not root_dir then
-    -- vim.notify("Project root not found!", vim.log.levels.INFO)
     return nil
   end
 
   M.root_dir = root_dir
 
   if lsp_util.path.exists(lsp_util.path.join(root_dir, "pom.xml")) then
-    return "mvn"
+    return BuildTool.MAVEN
   elseif lsp_util.path.exists(lsp_util.path.join(root_dir, "build.gradle")) then
-    return "gradle"
+    return BuildTool.GRADLE
   else
-    -- vim.notify("unknown build tool. current support: maven, gradle", vim.log.levels.INFO)
     return nil
   end
 end

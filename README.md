@@ -66,6 +66,39 @@ local config = {
     -- on_create = function(term) end,
     -- etc.
   },
+  menu = {
+    -- Default menu/popup configuration
+    auto_close = true,
+    enter = true,
+    focusable = true,
+    border = {
+      style = "rounded",
+      padding = { 1, 0 },
+      text = {
+        top = " 󰂓 Test history ",
+        top_align = "left",
+        bottom_align = "right",
+      },
+    },
+    position = "50%",
+    size = {
+      width = "40%",
+      height = "25%",
+    },
+    buf_options = {
+      filetype = "java-test",
+    },
+    win_options = {
+      winhighlight = "Normal:CursorLineNr,FloatBorder:FloatBorder",
+      cursorline = true,
+      number = true,
+    },
+    -- You can override any nui.nvim Popup option here
+    -- relative = "editor",
+    -- anchor = "NW",
+    -- zindex = 50,
+    -- etc.
+  },
 }
 ```
 

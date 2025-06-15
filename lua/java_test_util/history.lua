@@ -17,6 +17,7 @@ local CACHE_SUFFIX = "_history.lua"
 
 ---@param command string
 ---@param component string
+---@param type TestType
 ---@return boolean
 function M.check_for_duplicate(command, component, type)
   for _, item in ipairs(M.cmd_history) do
@@ -91,7 +92,7 @@ end
 
 ---@param command string
 ---@param component string
----@param type string
+---@param type TestType
 function M.save_to_history(command, component, type)
   if M.check_for_duplicate(command, component, type) then
     return
@@ -137,7 +138,7 @@ function M.get_command_by_component(component)
 end
 
 ---@param component string
----@return string
+---@return TestType|string
 function M.get_type_by_component(component)
   for _, item in ipairs(M.cmd_history) do
     if item.component == component then

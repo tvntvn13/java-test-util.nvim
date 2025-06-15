@@ -12,36 +12,21 @@ local build_tool_icons = {
   gradle = "  ",
 }
 
+---returns popup table, more info and options on:
+---[nui.nvim - Popup](https://github.com/MunifTanjim/nui.nvim/blob/main/lua/nui/popup/README.md)
+---@return table Popup
 function M.create_popup()
   local build_icon = build_tool_icons[util.build_tool]
 
-  local popup = Popup({
-    enter = true,
-    focusable = true,
+  local popup_config = vim.tbl_deep_extend("force", {
     border = {
-      style = "rounded",
-      padding = { 1, 0 },
       text = {
-        top = " 󰂓 Test history ",
-        top_align = "left",
         bottom = build_icon,
-        bottom_align = "right",
       },
     },
-    position = "50%",
-    size = {
-      width = "40%",
-      height = "25%",
-    },
-    buf_options = {
-      filetype = "java-test",
-    },
-    win_options = {
-      winhighlight = "Normal:CursorLineNr,FloatBorder:FloatBorder",
-      cursorline = true,
-      number = true,
-    },
-  })
+  }, shared.config.menu or {})
+
+  local popup = Popup(popup_config)
   return popup
 end
 
@@ -52,6 +37,10 @@ function M.delete_menu_item(_)
   history.remove_from_history(description)
 
   local current_line = vim.fn.line(".")
+  vim.api.nvim_set_option_value("readonly", false, { buf = M.popup.bufnr })
+  vim.api.nvim_set_option_value("modified", true, { buf = M.popup.bufnr })
+  vim.api.nvim_set_option_value("modifiable", true, { buf = M.popup.bufnr })
+
   vim.api.nvim_buf_set_lines(M.popup.bufnr, current_line - 1, current_line, false, {})
 
   local total_lines = vim.api.nvim_buf_line_count(M.popup.bufnr)
@@ -59,6 +48,10 @@ function M.delete_menu_item(_)
   if current_line > total_lines then
     vim.api.nvim_win_set_cursor(0, { total_lines, 0 })
   end
+
+  vim.api.nvim_set_option_value("readonly", true, { buf = M.popup.bufnr })
+  vim.api.nvim_set_option_value("modified", false, { buf = M.popup.bufnr })
+  vim.api.nvim_set_option_value("modifiable", false, { buf = M.popup.bufnr })
 end
 
 function M.select_menu_item(_)
@@ -70,7 +63,7 @@ function M.select_menu_item(_)
     util.notify_tests_running(component, type)
     terminal.run_command_in_terminal(command, component, type)
   end
-  if shared.config.auto_close_menu ~= false then
+  if shared.config.menu.auto_close ~= false then
     M.popup:unmount()
   end
 end

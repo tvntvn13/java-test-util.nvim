@@ -1,4 +1,5 @@
----https://github.com/akinsho/toggleterm.nvim/blob/main/lua/toggleterm/terminal.lua
+---Terminal from toggleterm
+---[toggleterm.nvim - Terminal](https://github.com/akinsho/toggleterm.nvim/blob/main/lua/toggleterm/terminal.lua#L76-L103)
 ---@class Terminal
 ---@field newline_chr string
 ---@field cmd string
@@ -37,7 +38,7 @@ local M = {}
 local history = require("java_test_util.history")
 local utils = require("java_test_util.util")
 
----@type Config
+---@type java_test_util.Config
 local shared = require("java_test_util.shared")
 
 ---@type string|nil
@@ -69,18 +70,7 @@ function M.run_command_in_terminal(command, component, type)
   -- Create terminal configuration by merging user config with defaults
   local terminal_config = vim.tbl_deep_extend("force", {
     cmd = command,
-    _display_name = function(_)
-      return " 󰂓 " .. component .. ":" .. type:upper()
-    end,
-    display_name = function(_)
-      return " 󰂓 " .. component .. ":" .. type:upper()
-    end,
-    float_opts = {
-      title = " 󰂓 " .. component .. ":" .. type:upper(),
-      display_name = " 󰂓 " .. component .. ":" .. type:upper(),
-      float_name = " 󰂓 " .. component .. ":" .. type:upper(),
-      float_title = " 󰂓 " .. component .. ":" .. type:upper(),
-    },
+    float_opts = {},
     on_open = function(term)
       vim.api.nvim_buf_set_keymap(
         term.bufnr,

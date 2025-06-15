@@ -4,5 +4,7 @@ max_comment_line_length = false
 globals = {
   "vim",
   "TestType",
+  "BuildTool",
+  "BuildToolWrapper",
   "_Toggle_term",
 }
