@@ -39,19 +39,33 @@ Currently only supports Maven projects.
 
 ```lua
 local config = {
-  use_maven_wrapper = false,
-  hide_terminal = true,
-  terminal_height = 25,
-  terminal_width = 90,
-  terminal_border = "curved",
-  display_name = "mvn test",
-  title_pos = "center",
-  direction = "float",
-  auto_scroll = true,
-  close_on_exit = false,
-  timeout_len = 5000,
+  use_wrapper = false,
+  timeout_len = 2000,
   toggle_key = "<leader>Mm",
   close_key = "q",
+  max_history_size = 12,
+  terminal = {
+    -- Default terminal configuration
+    hidden = true,
+    direction = "float",
+    auto_scroll = true,
+    close_on_exit = false,
+    float_opts = {
+      border = "curved",
+      height = 25,
+      width = 90,
+      title_pos = "center",
+      highlights = {
+        Normal = { link = "Normal" },
+        FloatBorder = { link = "FloatBorder" },
+      },
+    },
+    -- You can override any terminal option here
+    -- env = { MY_VAR = "value" },
+    -- clear_env = false,
+    -- on_create = function(term) end,
+    -- etc.
+  },
 }
 ```
 

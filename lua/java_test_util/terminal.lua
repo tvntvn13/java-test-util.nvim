@@ -66,33 +66,20 @@ function M.run_command_in_terminal(command, component, type)
     history.save_to_history(command, component, type)
   end
 
-  local float_term = terminal:new({
+  -- Create terminal configuration by merging user config with defaults
+  local terminal_config = vim.tbl_deep_extend("force", {
     cmd = command,
-    hidden = shared.config.hide_terminal,
     _display_name = function(_)
       return " 󰂓 " .. component .. ":" .. type:upper()
     end,
-
     display_name = function(_)
       return " 󰂓 " .. component .. ":" .. type:upper()
     end,
-    direction = shared.config.direction,
-    auto_scroll = shared.config.auto_scroll,
-    close_on_exit = shared.config.close_on_exit,
-    -- title = " 󰂓 " .. component .. type:upper(),
     float_opts = {
-      border = shared.config.terminal_border,
-      height = shared.config.terminal_height,
-      width = shared.config.terminal_width,
-      title_pos = shared.config.title_pos,
       title = " 󰂓 " .. component .. ":" .. type:upper(),
       display_name = " 󰂓 " .. component .. ":" .. type:upper(),
       float_name = " 󰂓 " .. component .. ":" .. type:upper(),
       float_title = " 󰂓 " .. component .. ":" .. type:upper(),
-      highlights = {
-        Normal = { link = "Normal" },
-        FloatBorder = { link = "FloatBorder" },
-      },
     },
     on_open = function(term)
       vim.api.nvim_buf_set_keymap(
@@ -108,18 +95,20 @@ function M.run_command_in_terminal(command, component, type)
       vim.cmd("startinsert!")
     end,
     on_stderr = function(_, _, _, _)
-      vim.notify(" Test failed")
+      vim.notify(" Test failed")
     end,
     on_exit = function(_, _, exit_code, _)
       if exit_code == 0 then
-        utils.show_message_until(" Tests passed", timeoutlen)
+        utils.show_message_until(" Tests passed", timeoutlen)
       elseif exit_code == 1 then
-        utils.show_message_until(" Tests failed", timeoutlen, vim.log.levels.ERROR)
+        utils.show_message_until(" Tests failed", timeoutlen, vim.log.levels.ERROR)
       end
     end,
-  })
+  }, shared.config.terminal or {})
 
-  if shared.config.hide_terminal == true then
+  local float_term = terminal:new(terminal_config)
+
+  if shared.config.terminal.hidden == true then
     float_term:spawn()
   else
     float_term:toggle()
