@@ -30,6 +30,12 @@ M.root_dir = nil
 ---@type BuildTool|nil
 M.build_tool = config.build_tool or nil
 
+---@type boolean|nil
+M.is_multimodule = nil
+
+---@type string|nil
+M.current_module = nil
+
 ---@param message string
 ---@param time integer
 ---@param level? integer
@@ -84,18 +90,20 @@ end
 ---@param package_name? string|nil
 ---@param class_name? string|nil
 ---@param method_name? string|nil
+---@param module_name? string|nil
 ---@return string
-local function build_maven_command(type, package_name, class_name, method_name)
+local function build_maven_command(type, package_name, class_name, method_name, module_name)
   local test_runner = config.use_wrapper and BuildToolWrapper.MAVEN or BuildTool.MAVEN
+  local module_flag = module_name and (" -pl=" .. module_name) or ""
 
   if type == TestType.ALL then
-    return test_runner .. " test"
+    return test_runner .. " test" .. module_flag
   elseif type == TestType.PACKAGE then
-    return test_runner .. " test -Dtest=" .. "'" .. package_name .. "/*.java'"
+    return test_runner .. " test -Dtest=" .. "'" .. package_name .. "/*.java'" .. module_flag
   elseif type == TestType.CLASS then
-    return test_runner .. " test -Dtest=" .. class_name
+    return test_runner .. " test -Dtest=" .. class_name .. module_flag
   elseif type == TestType.METHOD then
-    return test_runner .. " test -Dtest=" .. class_name .. "#" .. method_name
+    return test_runner .. " test -Dtest=" .. class_name .. "#" .. method_name .. module_flag
   else
     return ""
   end
@@ -105,18 +113,20 @@ end
 ---@param package_name? string
 ---@param class_name? string
 ---@param method_name? string
+---@param module_name? string|nil
 ---@return string
-local function build_gradle_command(type, package_name, class_name, method_name)
+local function build_gradle_command(type, package_name, class_name, method_name, module_name)
   local test_runner = config.use_wrapper and BuildToolWrapper.GRADLE or BuildTool.GRADLE
+  local module_prefix = module_name and (module_name .. ":") or ""
 
   if type == TestType.ALL then
-    return test_runner .. " test"
+    return test_runner .. " " .. module_prefix .. "test"
   elseif type == TestType.PACKAGE and package_name then
-    return test_runner .. " test --tests '*." .. package_name .. ".*'"
+    return test_runner .. " " .. module_prefix .. "test --tests '*." .. package_name .. ".*'"
   elseif type == TestType.CLASS and class_name then
-    return test_runner .. " test --tests " .. class_name
+    return test_runner .. " " .. module_prefix .. "test --tests " .. class_name
   elseif type == TestType.METHOD then
-    return test_runner .. " test --tests '*." .. class_name .. "." .. method_name .. "'"
+    return test_runner .. " " .. module_prefix .. "test --tests '*." .. class_name .. "." .. method_name .. "'"
   else
     return ""
   end
@@ -132,14 +142,16 @@ function M.build_test_command_string(type, package_name, class_name, method_name
     M.build_tool = M.detect_build_tool(M.root_dir)
   end
 
+  local module_name = M.get_current_module()
+
   ---@type string
   local command
 
   if M.build_tool == BuildTool.MAVEN then
-    command = build_maven_command(type, package_name, class_name, method_name)
+    command = build_maven_command(type, package_name, class_name, method_name, module_name)
     return command
   elseif M.build_tool == BuildTool.GRADLE then
-    command = build_gradle_command(type, package_name, class_name, method_name)
+    command = build_gradle_command(type, package_name, class_name, method_name, module_name)
     return command
   else
     return ""
@@ -197,6 +209,79 @@ end
 ---@return string
 function M.get_filepath()
   return vim.fn.expand("%:p")
+end
+
+---@param root_dir string
+---@return boolean
+function M.detect_multimodule_project(root_dir)
+  if M.is_multimodule ~= nil then
+    return M.is_multimodule
+  end
+
+  if not root_dir then
+    M.is_multimodule = false
+    return false
+  end
+
+  local build_files = {}
+
+  if M.build_tool == BuildTool.MAVEN then
+    local find_cmd = "find " .. vim.fn.shellescape(root_dir) .. " -name 'pom.xml' -type f"
+    local output = vim.fn.system(find_cmd)
+    if vim.v.shell_error == 0 then
+      for line in output:gmatch("[^\r\n]+") do
+        table.insert(build_files, line)
+      end
+    end
+  elseif M.build_tool == BuildTool.GRADLE then
+    local find_cmd = "find " .. vim.fn.shellescape(root_dir) .. " -name 'build.gradle*' -type f"
+    local output = vim.fn.system(find_cmd)
+    if vim.v.shell_error == 0 then
+      for line in output:gmatch("[^\r\n]+") do
+        table.insert(build_files, line)
+      end
+    end
+  end
+
+  M.is_multimodule = #build_files > 1
+  return M.is_multimodule
+end
+
+---@param file_path string
+---@return string|nil
+function M.get_module_name_from_path(file_path)
+  if not M.root_dir then
+    return nil
+  end
+
+  if not M.detect_multimodule_project(M.root_dir) then
+    return nil
+  end
+
+  local current_dir = vim.fn.fnamemodify(file_path, ":h")
+  local build_file_name = M.build_tool == BuildTool.MAVEN and "pom.xml" or "build.gradle"
+
+  while current_dir and current_dir ~= M.root_dir do
+    local build_file_path = lsp_util.path.join(current_dir, build_file_name)
+    if lsp_util.path.exists(build_file_path) then
+      local module_name = vim.fn.fnamemodify(current_dir, ":t")
+      return module_name
+    end
+    current_dir = vim.fn.fnamemodify(current_dir, ":h")
+  end
+
+  return nil
+end
+
+---@return string|nil
+function M.get_current_module()
+  if M.current_module then
+    return M.current_module
+  end
+
+  local file_path = M.get_filepath()
+  M.current_module = M.get_module_name_from_path(file_path)
+  return M.current_module
 end
 
 return M

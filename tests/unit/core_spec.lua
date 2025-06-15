@@ -23,7 +23,7 @@ describe("core:", function()
 
   it("should load config correctly", function()
     -- Arrange
-    ---@type Config
+    ---@type java_test_util.Config
     default_config = require("java_test_util.config")
     -- Act
     require("java_test_util").setup({})

@@ -4,6 +4,7 @@ local M = {}
 ---@field command? string
 ---@field component? string
 ---@field type? string
+---@field module? string
 
 local util = require("java_test_util.util")
 local shared = require("java_test_util.shared")
@@ -11,17 +12,18 @@ local shared = require("java_test_util.shared")
 ---@type CommandHistoryItem[]|nil
 M.cmd_history = {}
 
-local max_size = shared.config.max_history_size or 10
+local max_size = shared.config.max_history_size or 15
 local CACHE_PATH = "/java-test-util/"
 local CACHE_SUFFIX = "_history.lua"
 
 ---@param command string
 ---@param component string
 ---@param type TestType
+---@param module string|nil
 ---@return boolean
-function M.check_for_duplicate(command, component, type)
+function M.check_for_duplicate(command, component, type, module)
   for _, item in ipairs(M.cmd_history) do
-    if item.command == command and item.component == component and item.type == type then
+    if item.command == command and item.component == component and item.type == type and item.module == module then
       return true
     end
   end
@@ -93,8 +95,9 @@ end
 ---@param command string
 ---@param component string
 ---@param type TestType
-function M.save_to_history(command, component, type)
-  if M.check_for_duplicate(command, component, type) then
+---@param module string|nil
+function M.save_to_history(command, component, type, module)
+  if M.check_for_duplicate(command, component, type, module) then
     return
   end
 
@@ -102,14 +105,18 @@ function M.save_to_history(command, component, type)
     table.remove(M.cmd_history, 1)
   end
 
-  table.insert(M.cmd_history, { command = command, component = component, type = type })
+  table.insert(M.cmd_history, { command = command, component = component, type = type, module = module })
   M.write_history_to_cache()
 end
 
 ---@param component string
 function M.remove_from_history(component)
   for i, item in ipairs(M.cmd_history) do
-    if item.component == component then
+    local display_component = item.component
+    if item.module then
+      display_component = "[" .. item.module .. "] " .. display_component
+    end
+    if display_component == component then
       table.remove(M.cmd_history, i)
       M.write_history_to_cache()
       break
@@ -121,7 +128,11 @@ end
 function M.get_all_descriptions()
   local descriptions = {}
   for _, item in ipairs(M.cmd_history) do
-    table.insert(descriptions, item.component)
+    local description = item.component
+    if item.module then
+      description = "[" .. item.module .. "] " .. description
+    end
+    table.insert(descriptions, description)
   end
   return descriptions
 end
@@ -130,7 +141,11 @@ end
 ---@return string|nil
 function M.get_command_by_component(component)
   for _, item in ipairs(M.cmd_history) do
-    if item.component == component then
+    local display_component = item.component
+    if item.module then
+      display_component = "[" .. item.module .. "] " .. display_component
+    end
+    if display_component == component then
       return item.command
     end
   end
@@ -141,7 +156,11 @@ end
 ---@return TestType|string
 function M.get_type_by_component(component)
   for _, item in ipairs(M.cmd_history) do
-    if item.component == component then
+    local display_component = item.component
+    if item.module then
+      display_component = "[" .. item.module .. "] " .. display_component
+    end
+    if display_component == component then
       return item.type
     end
   end

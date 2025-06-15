@@ -63,8 +63,9 @@ function M.run_command_in_terminal(command, component, type)
   M.last_test_component = component
   M.last_test_type = type
 
-  if not history.check_for_duplicate(command, component, type) then
-    history.save_to_history(command, component, type)
+  local module_name = utils.get_current_module()
+  if not history.check_for_duplicate(command, component, type, module_name) then
+    history.save_to_history(command, component, type, module_name)
   end
 
   -- Create terminal configuration by merging user config with defaults
