@@ -1,4 +1,4 @@
-*java-test-util.txt*       For Neovim >= 0.9.5       Last change: 2025 June 11
+*java-test-util.txt*       For Neovim >= 0.9.5       Last change: 2025 June 15
 
 ==============================================================================
 Table of Contents                           *java-test-util-table-of-contents*
@@ -74,6 +74,39 @@ DEFAULT CONFIG ~
         -- env = { MY_VAR = "value" },
         -- clear_env = false,
         -- on_create = function(term) end,
+        -- etc.
+      },
+      menu = {
+        -- Default menu/popup configuration
+        auto_close = true,
+        enter = true,
+        focusable = true,
+        border = {
+          style = "rounded",
+          padding = { 1, 0 },
+          text = {
+            top = " 󰂓 Test history ",
+            top_align = "left",
+            bottom_align = "right",
+          },
+        },
+        position = "50%",
+        size = {
+          width = "40%",
+          height = "25%",
+        },
+        buf_options = {
+          filetype = "java-test",
+        },
+        win_options = {
+          winhighlight = "Normal:CursorLineNr,FloatBorder:FloatBorder",
+          cursorline = true,
+          number = true,
+        },
+        -- You can override any nui.nvim Popup option here
+        -- relative = "editor",
+        -- anchor = "NW",
+        -- zindex = 50,
         -- etc.
       },
     }
