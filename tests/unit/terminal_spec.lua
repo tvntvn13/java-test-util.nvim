@@ -40,7 +40,7 @@ describe("terminal:", function()
     assert.equals(M.last_test_command, nil)
     assert.equals(M.last_test_component, nil)
     assert.equals(shared.config.close_key, "q")
-    assert.equals(shared.config.use_wrapper, false)
+    assert.equals(shared.config.use_wrapper, true)
   end)
 
   it("should store last command and component", function()
@@ -69,18 +69,18 @@ describe("terminal:", function()
     assert.stub(terminal.new).was_called(2)
   end)
 
-  it("should run tests on the background if terminal.hidden is true", function()
+  it("should run tests on the background if auto_open is false", function()
     -- Arrange
-    require("java_test_util").setup({ terminal = { hidden = true } })
+    require("java_test_util").setup({ auto_open = false })
     -- Act
     M.run_command_in_terminal("mvn test", "all tests", TestType.ALL)
     -- Assert
     assert.stub(mock_term.spawn).was_called()
   end)
 
-  it("should run tests on the foreground if terminal.hidden is false", function()
+  it("should run tests on the foreground if auto_open is true", function()
     -- Arrange
-    require("java_test_util").setup({ terminal = { hidden = false } })
+    require("java_test_util").setup({ auto_open = true })
     -- Act
     M.run_command_in_terminal("mvn test", "all tests", TestType.ALL)
     -- Assert

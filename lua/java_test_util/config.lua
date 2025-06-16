@@ -53,16 +53,18 @@
 ---@field toggle_key string the key to toggle the test terminal
 ---@field close_key string the key to close the test terminal
 ---@field max_history_size number the maximum number of test commands to keep in history
+---@field auto_open boolean whether to open the terminal automatically or run in the background
 ---@field terminal TerminalConfig
 ---@field menu MenuConfig
 
 ---@type java_test_util.Config
 local config = {
-  use_wrapper = false,
+  use_wrapper = true,
   timeout_len = 2000,
   toggle_key = "<leader>Mm",
   close_key = "q",
   max_history_size = 12,
+  auto_open = false,
   terminal = {
     hidden = true,
     direction = "float",

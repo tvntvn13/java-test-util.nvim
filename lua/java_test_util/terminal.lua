@@ -38,16 +38,18 @@ local M = {}
 local history = require("java_test_util.history")
 local utils = require("java_test_util.util")
 
----@type java_test_util.Config
 local shared = require("java_test_util.shared")
 
----@type string|nil
+---@type string?
+M.root_dir = utils.root_dir or utils.get_project_root()
+
+---@type string?
 M.last_test_command = nil
 
----@type string|nil
+---@type string?
 M.last_test_component = nil
 
----@type TestType|nil
+---@type TestType?
 M.last_test_type = nil
 
 ---@type Terminal
@@ -71,6 +73,7 @@ function M.run_command_in_terminal(command, component, type)
   -- Create terminal configuration by merging user config with defaults
   local terminal_config = vim.tbl_deep_extend("force", {
     cmd = command,
+    dir = M.root_dir,
     float_opts = {},
     on_open = function(term)
       vim.api.nvim_buf_set_keymap(
@@ -99,10 +102,10 @@ function M.run_command_in_terminal(command, component, type)
 
   local float_term = terminal:new(terminal_config)
 
-  if shared.config.terminal.hidden == true then
-    float_term:spawn()
-  else
+  if shared.config.auto_open == true then
     float_term:toggle()
+  else
+    float_term:spawn()
   end
 
   function _Toggle_term()

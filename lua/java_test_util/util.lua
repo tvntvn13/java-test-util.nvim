@@ -2,7 +2,7 @@ local M = {}
 
 local ts_utils = require("nvim-treesitter.ts_utils")
 local lsp_util = require("lspconfig.util")
-local config = require("java_test_util.shared").config
+local shared = require("java_test_util.shared")
 
 ---@enum TestType
 TestType = {
@@ -24,16 +24,16 @@ BuildToolWrapper = {
   MAVEN = "./mvnw",
 }
 
----@type string|nil
+---@type string?
 M.root_dir = nil
 
----@type BuildTool|nil
-M.build_tool = config.build_tool or nil
+---@type BuildTool?
+M.build_tool = shared.config.build_tool or nil
 
----@type boolean|nil
+---@type boolean?
 M.is_multimodule = nil
 
----@type string|nil
+---@type string?
 M.current_module = nil
 
 ---@param message string
@@ -87,13 +87,13 @@ function M.get_package_name()
 end
 
 ---@param type TestType
----@param package_name? string|nil
----@param class_name? string|nil
----@param method_name? string|nil
----@param module_name? string|nil
+---@param package_name? string
+---@param class_name? string
+---@param method_name? string
+---@param module_name? string
 ---@return string
 local function build_maven_command(type, package_name, class_name, method_name, module_name)
-  local test_runner = config.use_wrapper and BuildToolWrapper.MAVEN or BuildTool.MAVEN
+  local test_runner = shared.config.use_wrapper and BuildToolWrapper.MAVEN or BuildTool.MAVEN
   local module_flag = module_name and (" -pl=" .. module_name) or ""
 
   if type == TestType.ALL then
@@ -113,10 +113,10 @@ end
 ---@param package_name? string
 ---@param class_name? string
 ---@param method_name? string
----@param module_name? string|nil
+---@param module_name? string
 ---@return string
 local function build_gradle_command(type, package_name, class_name, method_name, module_name)
-  local test_runner = config.use_wrapper and BuildToolWrapper.GRADLE or BuildTool.GRADLE
+  local test_runner = shared.config.use_wrapper and BuildToolWrapper.GRADLE or BuildTool.GRADLE
   local module_prefix = module_name and (module_name .. ":") or ""
 
   if type == TestType.ALL then
@@ -133,9 +133,9 @@ local function build_gradle_command(type, package_name, class_name, method_name,
 end
 
 ---@param type TestType
----@param package_name string|nil
----@param class_name string|nil
----@param method_name string|nil
+---@param package_name? string
+---@param class_name? string
+---@param method_name? string
 ---@return string
 function M.build_test_command_string(type, package_name, class_name, method_name)
   if not M.build_tool then
@@ -158,7 +158,7 @@ function M.build_test_command_string(type, package_name, class_name, method_name
   end
 end
 
----@return string|nil
+---@return string?
 function M.get_project_root()
   local root_dir_func = lsp_util.root_pattern({ ".git", ".mvn", "build.gradle", "gradlew", "mvnw", "pom.xml" })
   local root_dir = root_dir_func(M.get_filepath())
@@ -171,10 +171,10 @@ function M.get_project_root()
 end
 
 ---@param root_dir string root of project
----@return BuildTool|nil
+---@return BuildTool?
 function M.detect_build_tool(root_dir)
-  if config.build_tool then
-    return config.build_tool
+  if shared.config.build_tool then
+    return shared.config.build_tool
   end
 
   if not root_dir then
@@ -248,7 +248,7 @@ function M.detect_multimodule_project(root_dir)
 end
 
 ---@param file_path string
----@return string|nil
+---@return string?
 function M.get_module_name_from_path(file_path)
   if not M.root_dir then
     return nil
@@ -273,7 +273,7 @@ function M.get_module_name_from_path(file_path)
   return nil
 end
 
----@return string|nil
+---@return string?
 function M.get_current_module()
   if M.current_module then
     return M.current_module
