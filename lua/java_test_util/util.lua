@@ -275,10 +275,6 @@ end
 
 ---@return string?
 function M.get_current_module()
-  if M.current_module then
-    return M.current_module
-  end
-
   local file_path = M.get_filepath()
   M.current_module = M.get_module_name_from_path(file_path)
   return M.current_module
