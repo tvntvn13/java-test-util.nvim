@@ -76,10 +76,8 @@ describe("util:", function()
       -- Arrange
       M.is_multimodule = false
       local file_path = "/test-project/src/main/java/Test.java"
-
       -- Act
       local module_name = M.get_module_name_from_path(file_path)
-
       -- Assert
       assert.is_nil(module_name)
     end)
@@ -89,10 +87,8 @@ describe("util:", function()
       M.build_tool = "mvn"
       M.current_module = "test-module"
       stub(M, "get_current_module").returns("test-module")
-
       -- Act
       local command = M.build_test_command_string(TestType.CLASS, nil, "TestClass", nil)
-
       -- Assert
       assert.equals(command, "mvn test -Dtest=TestClass -pl=test-module")
       M.get_current_module:revert()
@@ -103,10 +99,8 @@ describe("util:", function()
       M.build_tool = "gradle"
       M.current_module = "test-module"
       stub(M, "get_current_module").returns("test-module")
-
       -- Act
       local command = M.build_test_command_string(TestType.CLASS, nil, "TestClass", nil)
-
       -- Assert
       assert.equals(command, "gradle test-module:test --tests TestClass")
       M.get_current_module:revert()
@@ -117,10 +111,8 @@ describe("util:", function()
       M.build_tool = "mvn"
       M.current_module = nil
       stub(M, "get_current_module").returns(nil)
-
       -- Act
       local command = M.build_test_command_string(TestType.CLASS, nil, "TestClass", nil)
-
       -- Assert
       assert.equals(command, "mvn test -Dtest=TestClass")
       M.get_current_module:revert()
@@ -143,10 +135,8 @@ describe("util:", function()
       -- Arrange
       M.build_tool = "gradle"
       stub(M, "get_current_module").returns("test-module")
-
       -- Act
       local command = M.build_test_command_string(TestType.METHOD, nil, "TestClass", "testMethod")
-
       -- Assert
       assert.equals(command, "gradle test-module:test --tests '*.TestClass.testMethod'")
       M.get_current_module:revert()
@@ -156,10 +146,8 @@ describe("util:", function()
       -- Arrange
       M.build_tool = "mvn"
       stub(M, "get_current_module").returns("test-module")
-
       -- Act
       local command = M.build_test_command_string(TestType.ALL, nil, nil, nil)
-
       -- Assert
       assert.equals(command, "mvn test -pl=test-module")
       M.get_current_module:revert()
@@ -169,10 +157,8 @@ describe("util:", function()
       -- Arrange
       M.build_tool = "gradle"
       stub(M, "get_current_module").returns("test-module")
-
       -- Act
       local command = M.build_test_command_string(TestType.ALL, nil, nil, nil)
-
       -- Assert
       assert.equals(command, "gradle test-module:test")
       M.get_current_module:revert()

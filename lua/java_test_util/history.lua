@@ -61,7 +61,7 @@ function M.load_cached_history()
   local cache_path = get_cache_path()
 
   if not cache_path then
-    vim.notify("no cache found", vim.log.levels.WARN)
+    vim.notify("no cache path found", vim.log.levels.WARN)
     return nil
   end
 
@@ -106,7 +106,8 @@ end
 ---@param type TestType
 ---@param module string?
 function M.save_to_history(command, component, type, module)
-  if M.check_for_duplicate(command, component, type, module) then
+  if M.check_for_duplicate(command, component, type, module) or module == "." then
+    -- when coming from menu, module is ".", so we don't create new entry for it
     return
   end
 

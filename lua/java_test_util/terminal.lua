@@ -26,6 +26,9 @@
 ---@field on_open fun(term:Terminal)?
 ---@field on_close fun(term:Terminal)?
 ---@field _display_name fun(term: Terminal): string
+---@field new fun(term: Terminal, config: TerminalConfig): Terminal
+---@field toggle fun(term: Terminal)?
+---@field spawn fun(term: Terminal)?
 ---@field __state TerminalState
 
 ---@class TerminalState

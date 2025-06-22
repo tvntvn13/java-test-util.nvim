@@ -46,10 +46,8 @@ describe("history:", function()
       local component = "TestClass"
       local type = TestType.CLASS
       local module = "module1"
-
       -- Act
       M.save_to_history(command, component, type, module)
-
       -- Assert
       assert.equals(#M.cmd_history, 1)
       assert.equals(M.cmd_history[1].command, command)
@@ -64,10 +62,8 @@ describe("history:", function()
       local component = "TestClass"
       local type = TestType.CLASS
       local module = nil
-
       -- Act
       M.save_to_history(command, component, type, module)
-
       -- Assert
       assert.equals(#M.cmd_history, 1)
       assert.equals(M.cmd_history[1].command, command)
@@ -83,10 +79,8 @@ describe("history:", function()
       local type = TestType.CLASS
       local module = "module1"
       M.save_to_history(command, component, type, module)
-
       -- Act
       local is_duplicate = M.check_for_duplicate(command, component, type, module)
-
       -- Assert
       assert.is_true(is_duplicate)
     end)
@@ -98,10 +92,8 @@ describe("history:", function()
       local component = "TestClass"
       local type = TestType.CLASS
       M.save_to_history(command1, component, type, "module1")
-
       -- Act
       local is_duplicate = M.check_for_duplicate(command2, component, type, "module2")
-
       -- Assert
       assert.is_false(is_duplicate)
     end)
@@ -126,21 +118,30 @@ describe("history:", function()
       -- Arrange
       local command = "mvn test -Dtest=TestClass -pl=module1"
       M.save_to_history(command, "TestClass", TestType.CLASS, "module1")
-
       -- Act
       local found_command = M.get_command_by_component("[module1] TestClass")
-
       -- Assert
       assert.equals(found_command, command)
+    end)
+
+    it("should not write to history if call came from menu (module is '.')", function()
+      -- Arrange
+      M.cmd_history = {}
+      local command = "mvn test -Dtest=TestClass -pl=module1"
+      local component = "TestClass"
+      local type = TestType.CLASS
+      local module = "."
+      -- Act
+      M.save_to_history(command, component, type, module)
+      -- Assert
+      assert.equals(#M.cmd_history, 0)
     end)
 
     it("should get type by component with module prefix", function()
       -- Arrange
       M.save_to_history("mvn test -Dtest=TestClass -pl=module1", "TestClass", TestType.CLASS, "module1")
-
       -- Act
       local found_type = M.get_type_by_component("[module1] TestClass")
-
       -- Assert
       assert.equals(found_type, TestType.CLASS)
     end)
@@ -149,10 +150,8 @@ describe("history:", function()
       -- Arrange
       M.save_to_history("mvn test -Dtest=TestClass -pl=module1", "TestClass", TestType.CLASS, "module1")
       M.save_to_history("mvn test -Dtest=TestClass2", "TestClass2", TestType.CLASS, nil)
-
       -- Act
       M.remove_from_history("[module1] TestClass")
-
       -- Assert
       assert.equals(#M.cmd_history, 1)
       assert.equals(M.cmd_history[1].component, "TestClass2")

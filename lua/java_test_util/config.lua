@@ -4,7 +4,7 @@
 ---@field hidden boolean? whether or not to include this terminal in the terminals list
 ---@field close_on_exit boolean? whether or not to close the terminal window when the process exits
 ---@field auto_scroll boolean? whether or not to scroll down on terminal output
----@field float_opts table<string, any>?
+---@field float_opts table<string, any>? --TODO: add the correct options
 ---@field display_name string?
 ---@field env table<string, string>? environmental variables passed to jobstart()
 ---@field clear_env boolean? use clean job environment, passed to jobstart()
@@ -55,6 +55,7 @@
 ---@field max_history_size number the maximum number of test commands to keep in history
 ---@field auto_open boolean whether to open the terminal automatically or run in the background
 ---@field terminal TerminalConfig
+---@field build_tool BuildTool?
 ---@field menu MenuConfig
 
 ---@type java_test_util.Config
@@ -72,9 +73,12 @@ local config = {
     close_on_exit = false,
     float_opts = {
       border = "curved",
-      height = 25,
-      width = 90,
-      title_pos = "center",
+      width = function()
+        return math.floor(vim.api.nvim_win_get_width(0) * 0.8)
+      end,
+      height = function()
+        return math.floor(vim.api.nvim_win_get_height(0) * 0.6)
+      end,
       highlights = {
         Normal = { link = "Normal" },
         FloatBorder = { link = "FloatBorder" },
