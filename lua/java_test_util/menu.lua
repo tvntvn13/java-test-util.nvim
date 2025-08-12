@@ -30,28 +30,30 @@ function M.create_popup()
   return popup
 end
 
-function M.delete_menu_item(_)
+---@param bufnr number
+---@param readonly boolean
+local function set_readonly_buffer_option_value(bufnr, readonly)
+  vim.api.nvim_set_option_value("readonly", readonly, { buf = bufnr })
+  vim.api.nvim_set_option_value("modified", not readonly, { buf = bufnr })
+  vim.api.nvim_set_option_value("modifiable", not readonly, { buf = bufnr })
+end
+
+function M.delete_menu_item()
   history.load_cached_history()
+
   local description = vim.api.nvim_get_current_line()
-
   history.remove_from_history(description)
-
   local current_line = vim.fn.line(".")
-  vim.api.nvim_set_option_value("readonly", false, { buf = M.popup.bufnr })
-  vim.api.nvim_set_option_value("modified", true, { buf = M.popup.bufnr })
-  vim.api.nvim_set_option_value("modifiable", true, { buf = M.popup.bufnr })
 
+  set_readonly_buffer_option_value(M.popup.bufnr, false)
   vim.api.nvim_buf_set_lines(M.popup.bufnr, current_line - 1, current_line, false, {})
 
   local total_lines = vim.api.nvim_buf_line_count(M.popup.bufnr)
-
   if current_line > total_lines then
     vim.api.nvim_win_set_cursor(0, { total_lines, 0 })
   end
 
-  vim.api.nvim_set_option_value("readonly", true, { buf = M.popup.bufnr })
-  vim.api.nvim_set_option_value("modified", false, { buf = M.popup.bufnr })
-  vim.api.nvim_set_option_value("modifiable", false, { buf = M.popup.bufnr })
+  set_readonly_buffer_option_value(M.popup.bufnr, true)
 end
 
 function M.select_menu_item(_)
@@ -75,12 +77,10 @@ function M.create_history_menu()
   M.popup:mount()
 
   vim.api.nvim_buf_set_lines(M.popup.bufnr, 0, -1, false, descriptions)
-  vim.api.nvim_set_option_value("readonly", true, { buf = M.popup.bufnr })
-  vim.api.nvim_set_option_value("modified", false, { buf = M.popup.bufnr })
-  vim.api.nvim_set_option_value("modifiable", false, { buf = M.popup.bufnr })
+  set_readonly_buffer_option_value(M.popup.bufnr, true)
 
   M.popup:map("n", "<cr>", function(_)
-    M.select_menu_item(_)
+    M.select_menu_item()
   end, { noremap = true, silent = true })
 
   M.popup:map("n", "d", function()

@@ -62,4 +62,106 @@ describe("util:", function()
     assert.stub(vim.notify).was_called_with("hello", 4)
     assert.stub(vim.notify).was_called(1)
   end)
+
+  describe("multimodule support:", function()
+    before_each(function()
+      -- Reset multimodule state
+      M.is_multimodule = nil
+      M.current_module = nil
+      M.root_dir = "/test-project"
+      M.build_tool = "mvn"
+    end)
+
+    it("should return nil for single module project", function()
+      -- Arrange
+      M.is_multimodule = false
+      local file_path = "/test-project/src/main/java/Test.java"
+      -- Act
+      local module_name = M.get_module_name_from_path(file_path)
+      -- Assert
+      assert.is_nil(module_name)
+    end)
+
+    it("should build maven command with module flag", function()
+      -- Arrange
+      M.build_tool = "mvn"
+      M.current_module = "test-module"
+      stub(M, "get_current_module").returns("test-module")
+      -- Act
+      local command = M.build_test_command_string(TestType.CLASS, nil, "TestClass", nil)
+      -- Assert
+      assert.equals(command, "mvn test -Dtest=TestClass -pl=test-module")
+      M.get_current_module:revert()
+    end)
+
+    it("should build gradle command with module prefix", function()
+      -- Arrange
+      M.build_tool = "gradle"
+      M.current_module = "test-module"
+      stub(M, "get_current_module").returns("test-module")
+      -- Act
+      local command = M.build_test_command_string(TestType.CLASS, nil, "TestClass", nil)
+      -- Assert
+      assert.equals(command, "gradle test-module:test --tests TestClass")
+      M.get_current_module:revert()
+    end)
+
+    it("should build command without module for single module project", function()
+      -- Arrange
+      M.build_tool = "mvn"
+      M.current_module = nil
+      stub(M, "get_current_module").returns(nil)
+      -- Act
+      local command = M.build_test_command_string(TestType.CLASS, nil, "TestClass", nil)
+      -- Assert
+      assert.equals(command, "mvn test -Dtest=TestClass")
+      M.get_current_module:revert()
+    end)
+
+    it("should build maven method command with module flag", function()
+      -- Arrange
+      M.build_tool = "mvn"
+      stub(M, "get_current_module").returns("test-module")
+
+      -- Act
+      local command = M.build_test_command_string(TestType.METHOD, nil, "TestClass", "testMethod")
+
+      -- Assert
+      assert.equals(command, "mvn test -Dtest=TestClass#testMethod -pl=test-module")
+      M.get_current_module:revert()
+    end)
+
+    it("should build gradle method command with module prefix", function()
+      -- Arrange
+      M.build_tool = "gradle"
+      stub(M, "get_current_module").returns("test-module")
+      -- Act
+      local command = M.build_test_command_string(TestType.METHOD, nil, "TestClass", "testMethod")
+      -- Assert
+      assert.equals(command, "gradle test-module:test --tests '*.TestClass.testMethod'")
+      M.get_current_module:revert()
+    end)
+
+    it("should build maven all tests command with module flag", function()
+      -- Arrange
+      M.build_tool = "mvn"
+      stub(M, "get_current_module").returns("test-module")
+      -- Act
+      local command = M.build_test_command_string(TestType.ALL, nil, nil, nil)
+      -- Assert
+      assert.equals(command, "mvn test -pl=test-module")
+      M.get_current_module:revert()
+    end)
+
+    it("should build gradle all tests command with module prefix", function()
+      -- Arrange
+      M.build_tool = "gradle"
+      stub(M, "get_current_module").returns("test-module")
+      -- Act
+      local command = M.build_test_command_string(TestType.ALL, nil, nil, nil)
+      -- Assert
+      assert.equals(command, "gradle test-module:test")
+      M.get_current_module:revert()
+    end)
+  end)
 end)
