@@ -26,23 +26,23 @@ function M.setup(opts)
 
   history.load_cached_history()
 
-  vim.api.nvim_create_user_command("JTRunMethod", core.run_mvn_test_for_current_method, {
+  vim.api.nvim_create_user_command("JTRunMethod", core.run_test_for_current_method, {
     desc = "Run tests for current method",
   })
 
-  vim.api.nvim_create_user_command("JTRunClass", core.run_mvn_test_for_current_class, {
+  vim.api.nvim_create_user_command("JTRunClass", core.run_test_for_current_class, {
     desc = "Run tests for current class",
   })
 
-  vim.api.nvim_create_user_command("JTRunPackage", core.run_mvn_test_for_current_package, {
+  vim.api.nvim_create_user_command("JTRunPackage", core.run_test_for_current_package, {
     desc = "Run tests for current package",
   })
 
-  vim.api.nvim_create_user_command("JTRunPrev", core.run_mvn_previous_test, {
+  vim.api.nvim_create_user_command("JTRunPrev", core.run_previous_test, {
     desc = "Run previous test",
   })
 
-  vim.api.nvim_create_user_command("JTRunAll", core.run_mvn_test_for_all, {
+  vim.api.nvim_create_user_command("JTRunAll", core.run_test_for_all, {
     desc = "Run all tests",
   })
 
